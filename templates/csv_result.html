@@ -1,0 +1,33 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+    <title>Power mean.</title>
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        th,td{
+            border:1px solid #ccccff;
+            padding: 5px;
+        }
+        td{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <a href="/power">回到首頁</a><br>
+	<p>file uploaded successfully. path = {{ filepath }}<br></p>
+    
+    <table>
+        <tr>
+            <th>Power-IA Core Power(Watts) mean.</th>
+            <th>Power-Integrated Graphics Power(Watts) mean.</th>
+        </tr>
+        <tr>
+            <td>{{ cpu_mean }}</td>
+            <td>{{ gpu_mean }}</td>
+        </tr>
+    </table>
+</body>
+</html>

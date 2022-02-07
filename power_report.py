@@ -11,6 +11,8 @@ import pandas as pd
 
 app = Flask(__name__)
 
+ALLOWED_EXTENSIONS = {'csv'}
+
 @app.route("/")
 def hello():
     return "Flask on port 8888."
@@ -19,22 +21,25 @@ def hello():
 def power():
     return render_template("./power_upload.html")
 
+def allowed_file(filename):
+    # 判斷後綴
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
 def parseCSV(file):
     df = pd.read_csv(file)
-    msg = '<table>'
-    msg += '<tr>'
-    msg += '    <th>Power-IA Core Power(Watts) mean.</th>'
-    msg += '    <th>Power-Integrated Graphics Power(Watts) mean.</th>'
-    msg += '<tr>'
-    msg += '<tr>'
-    msg += ('    <td>'+ str(df['Power-IA Core Power(Watts)'].mean()) +'</td>')
-    msg += ('    <td>'+ str(df['Power-Integrated Graphics Power(Watts)'].mean()) +'</td>')
-    msg += '<tr>'
-    msg += '</table>'
-    
+    # msg = '<table>'
+    # msg += '<tr>'
+    # msg += '    <th>Power-IA Core Power(Watts) mean.</th>'
+    # msg += '    <th>Power-Integrated Graphics Power(Watts) mean.</th>'
+    # msg += '<tr>'
+    # msg += '<tr>'
+    # msg += ('    <td>'+ str(df['Power-IA Core Power(Watts)'].mean()) +'</td>')
+    # msg += ('    <td>'+ str(df['Power-Integrated Graphics Power(Watts)'].mean()) +'</td>')
+    # msg += '<tr>'
+    # msg += '</table>'
     # print(msg)
     
-    return msg
+    return df['Power-IA Core Power(Watts)'].mean(), df['Power-Integrated Graphics Power(Watts)'].mean()
 
 @app.route("/upload_show", methods=['GET', 'POST'])
 def upload_show():
@@ -42,17 +47,24 @@ def upload_show():
     
     if request.method == 'POST':
         file = request.files['file']
+        print(file)
         # read by pandas
-        mean_msg = parseCSV(file)
+        # mean_msg = parseCSV(file)
+        
         
         filename = secure_filename(file.filename)
-        if filename == '':
-            return "file is empty"
+        if filename == '' or not allowed_file(filename):
+            return "file is empty or not .csv"
+        
+        cpu_mean, gpu_mean = parseCSV(file)
+        
         filepath = os.path.join('./upload', filename)
         #file.save(filepath)
-        msg = "file uploaded successfully. path = " + filepath + "<br>"
-        msg += mean_msg
-        #msg += ('<a href="/download/' + filename + '">Download file</a><br>')
+        
+        # msg = "file uploaded successfully. path = " + filepath + "<br>"
+        # msg += mean_msg
+        # msg += ('<a href="/download/' + filename + '">Download file</a><br>')
+        return render_template('csv_result.html', filepath = filepath, cpu_mean = cpu_mean, gpu_mean = gpu_mean)
     else:
         msg = "file uploaded failed"
         
